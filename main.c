@@ -10,7 +10,10 @@
 */
 
 #include <stdbool.h>
-#include <stdint.h>s
+#include <stdint.h>
+
+
+
 
 /**
  * @brief Function for application main entry.
