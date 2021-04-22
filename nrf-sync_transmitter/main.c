@@ -1,9 +1,9 @@
 /** @file
 *
-* @defgroup nrf-sync_receiver_main main.c
+* @defgroup nrf-sync_transmitter_main main.c
 * @{
-* @ingroup nrf-sync_receiver
-* @brief Nrf-Sync Receiver Application main file.
+* @ingroup nrf-sync_transmitter
+* @brief Nrf-Sync Transmitter Application main file.
 *
 * This file contains the source code for the Nrf-Sync application transmitter.
 *
