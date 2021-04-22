@@ -8,6 +8,7 @@
 * This file contains the source code for the Nrf-Sync application.
 *
 */
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -35,7 +36,6 @@
 #define PULSE_FREQUENCY 1000 //Time in ms
 
 #define TIMER_OFFSET 0 //Time in ms
-
 
 /**
  * @brief Function for initializing output pin with GPIOTE. It will be set in Task mode with action on pin configured 
