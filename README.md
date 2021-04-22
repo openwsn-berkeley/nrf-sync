@@ -1,3 +1,3 @@
-##Nrf-Sync
+##Nrf-Sync 📡
 
 Nrf-Sync is a ...
