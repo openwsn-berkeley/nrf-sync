@@ -1,11 +1,11 @@
 Output/Release/Obj/transmitter_pca10056/nrf_atfifo.o: \
  /Users/martinabalbi/nRF5_SDK_17.0.2_d674dde/components/libraries/atomic_fifo/nrf_atfifo.c \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/string.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/__crossworks.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdint.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdbool.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/string.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/__crossworks.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdint.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdbool.h \
  ../../../../../../../components/libraries/util/app_util.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stddef.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stddef.h \
  ../../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../../modules/nrfx/mdk/nrf.h \

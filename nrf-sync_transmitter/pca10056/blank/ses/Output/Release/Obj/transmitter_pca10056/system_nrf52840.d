@@ -1,7 +1,7 @@
 Output/Release/Obj/transmitter_pca10056/system_nrf52840.o: \
  /Users/martinabalbi/nRF5_SDK_17.0.2_d674dde/modules/nrfx/mdk/system_nrf52840.c \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdint.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdbool.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdint.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdbool.h \
  /Users/martinabalbi/nRF5_SDK_17.0.2_d674dde/modules/nrfx/mdk/nrf.h \
  /Users/martinabalbi/nRF5_SDK_17.0.2_d674dde/modules/nrfx/mdk/nrf52840.h \
  ../../../../../../../components/toolchain/cmsis/include/core_cm4.h \

@@ -1,10 +1,10 @@
 Output/Release/Obj/transmitter_pca10056/nrf_log_frontend.o: \
  /Users/martinabalbi/nRF5_SDK_17.0.2_d674dde/components/libraries/log/src/nrf_log_frontend.c \
  ../../../../../../../components/libraries/util/sdk_common.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdint.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdbool.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/string.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/__crossworks.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdint.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdbool.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/string.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/__crossworks.h \
  ../config/sdk_config.h \
  ../../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
@@ -12,7 +12,7 @@ Output/Release/Obj/transmitter_pca10056/nrf_log_frontend.o: \
  ../../../../../../../components/libraries/util/sdk_errors.h \
  ../../../../../../../components/drivers_nrf/nrf_soc_nosd/nrf_error.h \
  ../../../../../../../components/libraries/util/app_util.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stddef.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stddef.h \
  ../../../../../../../modules/nrfx/mdk/nrf.h \
  ../../../../../../../modules/nrfx/mdk/nrf52840.h \
  ../../../../../../../components/toolchain/cmsis/include/core_cm4.h \
@@ -30,7 +30,7 @@ Output/Release/Obj/transmitter_pca10056/nrf_log_frontend.o: \
  ../../../../../../../components/libraries/util/app_util.h \
  ../../../../../../../components/libraries/util/app_util_platform.h \
  ../../../../../../../components/libraries/util/app_error.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdio.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdio.h \
  ../../../../../../../components/libraries/util/app_error_weak.h \
  ../../../../../../../components/libraries/log/nrf_log.h \
  ../../../../../../../components/libraries/experimental_section_vars/nrf_section.h \
@@ -46,7 +46,7 @@ Output/Release/Obj/transmitter_pca10056/nrf_log_frontend.o: \
  ../../../../../../../components/libraries/log/src/nrf_log_ctrl_internal.h \
  ../../../../../../../components/libraries/log/nrf_log_backend_interface.h \
  ../../../../../../../components/libraries/memobj/nrf_memobj.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdlib.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdlib.h \
  ../../../../../../../components/libraries/balloc/nrf_balloc.h \
  ../../../../../../../components/libraries/log/nrf_log_backend_interface.h \
  ../../../../../../../components/libraries/log/nrf_log_str_formatter.h \

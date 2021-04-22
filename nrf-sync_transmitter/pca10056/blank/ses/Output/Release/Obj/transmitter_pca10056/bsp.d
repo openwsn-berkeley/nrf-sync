@@ -1,16 +1,16 @@
 Output/Release/Obj/transmitter_pca10056/bsp.o: \
  /Users/martinabalbi/nRF5_SDK_17.0.2_d674dde/components/libraries/bsp/bsp.c \
  /Users/martinabalbi/nRF5_SDK_17.0.2_d674dde/components/libraries/bsp/bsp.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdint.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdbool.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdint.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdbool.h \
  ../../../../../../../components/boards/boards.h \
  ../../../../../../../modules/nrfx/hal/nrf_gpio.h \
  ../../../../../../../modules/nrfx/nrfx.h \
  ../../../../../../../integration/nrfx/nrfx_config.h \
  ../config/sdk_config.h \
  ../../../../../../../modules/nrfx/drivers/nrfx_common.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stddef.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/__crossworks.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stddef.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/__crossworks.h \
  ../../../../../../../modules/nrfx/mdk/nrf.h \
  ../../../../../../../modules/nrfx/mdk/nrf52840.h \
  ../../../../../../../components/toolchain/cmsis/include/core_cm4.h \
@@ -37,7 +37,7 @@ Output/Release/Obj/transmitter_pca10056/bsp.o: \
  ../../../../../../../components/libraries/util/app_util_platform.h \
  ../../../../../../../components/libraries/util/nrf_assert.h \
  ../../../../../../../components/libraries/util/app_error.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdio.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdio.h \
  ../../../../../../../components/libraries/util/sdk_errors.h \
  ../../../../../../../components/drivers_nrf/nrf_soc_nosd/nrf_error.h \
  ../../../../../../../components/libraries/util/app_error_weak.h \

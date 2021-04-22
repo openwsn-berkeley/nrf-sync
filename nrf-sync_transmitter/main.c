@@ -12,30 +12,27 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include "radio_config.h"
-#include "nrf_gpio.h"
-#include "boards.h"
-#include "bsp.h"
-#include "app_timer.h"
-#include "nordic_common.h"
-#include "nrf_error.h"
-#include "app_error.h"
-
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_log_default_backends.h"
+#include "nrf52840_bitfields.h"
+#include "nrf52840.h"
+#include "nrf52840_peripherals.h"
 
 //GPIOTE info
 #define OUTPUT_PIN_NUMBER 8UL //Output pin number
 #define OUTPUT_PIN_PORT 1UL //Output pin port
 
 #define GPIOTE_CH 0
+#define GPIOTE_ADDR 0x40006000
+#define GPIOTE_TASK_OUT_0_ADDR_OFFSET 0x000
 
 //TIMER info
 #define PULSE_DURATION 10 //Time in ms
 #define PULSE_PERIOD 1000 //Time in ms -> 1 pulse per second
-
 #define TIMER_OFFSET 0 //Time in ms
+
+#define TIMER0_ADDR 0x40008000
+#define TIMER0_EVENT_COMPARE_0_ADDR_OFFSET 0x140
+#define TIMER0_EVENT_COMPARE_1_ADDR_OFFSET 0x144
+#define TIMER0_EVENT_COMPARE_2_ADDR_OFFSET 0x148
 
 /**
  * @brief Function for initializing output pin with GPIOTE. It will be set in Task mode with action on pin configured 
@@ -68,11 +65,25 @@ void timer0_setup() {
 
 /**
  * @brief Function for initializing PPI. 
- * Connections to be made: - EVENTS_COMPARE[0] with TASK_OUT[GPIOTE_CH] (will set pin high)
- *                         - EVENTS_COMPARE[1] with TASK_OUT[GPIOTE_CH] (will set pin low)
+ * Connections to be made: - EVENTS_COMPARE[0] with TASK_OUT[GPIOTE_CH] (will set pin high) -> PPI channel 0
+ *                         - EVENTS_COMPARE[1] with TASK_OUT[GPIOTE_CH] (will set pin low)  -> PPI channel 1
  */
 void ppi_setup() {
-    
+    //get endpoint addresses
+    uint32_t gpiote_task_addr = GPIOTE_ADDR + GPIOTE_TASK_OUT_0_ADDR_OFFSET;
+    uint32_t timer0_events_compare_0_addr = TIMER0_ADDR + TIMER0_EVENT_COMPARE_0_ADDR_OFFSET;
+    uint32_t timer0_events_compare_1_addr = TIMER0_ADDR + TIMER0_EVENT_COMPARE_1_ADDR_OFFSET;
+
+    //set endpoints
+    NRF_PPI->CH[0].EEP = timer0_events_compare_0_addr;
+    NRF_PPI->CH[0].TEP = gpiote_task_addr;
+
+    NRF_PPI->CH[1].EEP = timer0_events_compare_1_addr;
+    NRF_PPI->CH[1].TEP = gpiote_task_addr;
+
+    //enable channels
+    NRF_PPI->CHENSET = (PPI_CHENSET_CH0_Enabled << PPI_CHENSET_CH0_Pos) | 
+                       (PPI_CHENSET_CH1_Enabled << PPI_CHENSET_CH1_Pos);
 }
 
 /**
@@ -82,6 +93,17 @@ void ppi_setup() {
 int main(void) {
     //TEST 1: Generate square wave with 10ms duty cycle, offset 0.
 
+    //setup peripherals
+    gpiote_setup();
+    timer0_setup();
+    ppi_setup();
+
+    //Start timer0
+    NRF_TIMER0->TASKS_START = TIMER_TASKS_START_TASKS_START_Trigger;
+
+    while (true) {
+        __WFE();
+    }
 }
 
 /**

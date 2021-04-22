@@ -3,10 +3,10 @@ Output/Release/Obj/transmitter_pca10056/app_timer2.o: \
  /Users/martinabalbi/nRF5_SDK_17.0.2_d674dde/components/libraries/timer/app_timer.h \
  ../config/sdk_config.h \
  ../../../../../../../components/libraries/util/app_error.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdint.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdio.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/__crossworks.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stdbool.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdint.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdio.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/__crossworks.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stdbool.h \
  ../../../../../../../modules/nrfx/mdk/nrf.h \
  ../../../../../../../modules/nrfx/mdk/nrf52840.h \
  ../../../../../../../components/toolchain/cmsis/include/core_cm4.h \
@@ -24,7 +24,7 @@ Output/Release/Obj/transmitter_pca10056/app_timer2.o: \
  ../../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../../components/libraries/util/app_error_weak.h \
  ../../../../../../../components/libraries/util/app_util.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/stddef.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/stddef.h \
  ../../../../../../../modules/nrfx/mdk/compiler_abstraction.h \
  ../../../../../../../components/libraries/util/nordic_common.h \
  ../../../../../../../components/libraries/log/nrf_log_instance.h \
@@ -53,7 +53,7 @@ Output/Release/Obj/transmitter_pca10056/app_timer2.o: \
  ../../../../../../../modules/nrfx/drivers/nrfx_errors.h \
  ../../../../../../../components/libraries/log/nrf_log.h \
  ../../../../../../../components/libraries/util/sdk_common.h \
- /Applications/SEGGER\ Embedded\ Studio\ for\ ARM\ 5.42/include/string.h \
+ /Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include/string.h \
  ../../../../../../../components/libraries/util/sdk_os.h \
  ../../../../../../../components/libraries/util/app_util.h \
  ../../../../../../../components/libraries/util/sdk_macros.h \
