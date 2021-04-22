@@ -17,22 +17,16 @@
 #include "nrf52840_peripherals.h"
 
 //GPIOTE info
-#define OUTPUT_PIN_NUMBER 8UL //Output pin number
-#define OUTPUT_PIN_PORT 1UL //Output pin port
+#define OUTPUT_PIN_NUMBER 13UL //Output pin number
+#define OUTPUT_PIN_PORT 0UL //Output pin port
 
 #define GPIOTE_CH 0
-#define GPIOTE_ADDR 0x40006000
-#define GPIOTE_TASK_OUT_0_ADDR_OFFSET 0x000
 
 //TIMER info
 #define PULSE_DURATION 10 //Time in ms
 #define PULSE_PERIOD 1000 //Time in ms -> 1 pulse per second
-#define TIMER_OFFSET 0 //Time in ms
+#define TIMER_OFFSET 0.001 //Time in ms
 
-#define TIMER0_ADDR 0x40008000
-#define TIMER0_EVENT_COMPARE_0_ADDR_OFFSET 0x140
-#define TIMER0_EVENT_COMPARE_1_ADDR_OFFSET 0x144
-#define TIMER0_EVENT_COMPARE_2_ADDR_OFFSET 0x148
 
 /**
  * @brief Function for initializing output pin with GPIOTE. It will be set in Task mode with action on pin configured 
@@ -43,7 +37,7 @@ void gpiote_setup() {
                                     (OUTPUT_PIN_NUMBER             << GPIOTE_CONFIG_PSEL_Pos) |
                                     (OUTPUT_PIN_PORT               << GPIOTE_CONFIG_PORT_Pos) |
                                     (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
-                                    (GPIOTE_CONFIG_OUTINIT_Low     << GPIOTE_CONFIG_OUTINIT_Pos);
+                                    (GPIOTE_CONFIG_OUTINIT_High    << GPIOTE_CONFIG_OUTINIT_Pos);
 }
 
 /**
@@ -70,20 +64,20 @@ void timer0_setup() {
  */
 void ppi_setup() {
     //get endpoint addresses
-    uint32_t gpiote_task_addr = GPIOTE_ADDR + GPIOTE_TASK_OUT_0_ADDR_OFFSET;
-    uint32_t timer0_events_compare_0_addr = TIMER0_ADDR + TIMER0_EVENT_COMPARE_0_ADDR_OFFSET;
-    uint32_t timer0_events_compare_1_addr = TIMER0_ADDR + TIMER0_EVENT_COMPARE_1_ADDR_OFFSET;
+    uint32_t gpiote_task_addr = &NRF_GPIOTE->TASKS_OUT[GPIOTE_CH];
+    uint32_t timer0_events_compare_0_addr = &NRF_TIMER0->EVENTS_COMPARE[0];
+    uint32_t timer0_events_compare_1_addr = &NRF_TIMER0->EVENTS_COMPARE[1];
 
     //set endpoints
     NRF_PPI->CH[0].EEP = timer0_events_compare_0_addr;
     NRF_PPI->CH[0].TEP = gpiote_task_addr;
+    NRF_PPI->CHENSET = (PPI_CHENSET_CH0_Enabled << PPI_CHENSET_CH0_Pos);
 
     NRF_PPI->CH[1].EEP = timer0_events_compare_1_addr;
     NRF_PPI->CH[1].TEP = gpiote_task_addr;
 
     //enable channels
-    NRF_PPI->CHENSET = (PPI_CHENSET_CH0_Enabled << PPI_CHENSET_CH0_Pos) | 
-                       (PPI_CHENSET_CH1_Enabled << PPI_CHENSET_CH1_Pos);
+    NRF_PPI->CHENSET |= (PPI_CHENSET_CH1_Enabled << PPI_CHENSET_CH1_Pos);
 }
 
 /**
