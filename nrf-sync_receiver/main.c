@@ -51,10 +51,10 @@ void gpiote_setup() {
 
 /**
  * @brief Function for initializing TIMER0. This Timer will be in charge of managing the pulse duration and frequency.
- * Default values: PRESCALER = 4, MODE = Timer,
+ * Default values: PRESCALER = 4, MODE = Timer
  */
 void timer0_setup() {
-    
+    NRF_TIMER0->BITMODE = TIMER_BITMODE_BITMODE_32Bit;
 }
 
 
