@@ -2,5 +2,6 @@
     "files.associations": {
         "boards.h": "c",
         "pca10056.h": "c"
-    }
+    },
+    "gitdoc.enabled": false
 }

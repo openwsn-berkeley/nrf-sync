@@ -5,7 +5,7 @@
 * @ingroup nrf-sync_receiver
 * @brief Nrf-Sync Receiver Application main file.
 *
-* This file contains the source code for the Nrf-Sync application.
+* This file contains the source code for the Nrf-Sync application transmitter.
 *
 */
 
