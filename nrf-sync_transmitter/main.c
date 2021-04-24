@@ -54,7 +54,22 @@ void timer0_setup() {
     //Event when CC[0] and CC[1] will be connected via PPI to the GPIOTE task. Event when CC[2] is shortcutted to clear timer 
     //task. Then timer automatically starts again. This will be changed when the Radio is the one that manages this. 
 
+    NRF_TIMER0->INTENCLR = (TIMER_INTENCLR_COMPARE0_Clear << TIMER_INTENCLR_COMPARE0_Pos) |
+                           (TIMER_INTENCLR_COMPARE1_Clear << TIMER_INTENCLR_COMPARE1_Pos) |
+                           (TIMER_INTENCLR_COMPARE2_Clear << TIMER_INTENCLR_COMPARE2_Pos) |
+                           (TIMER_INTENCLR_COMPARE3_Clear << TIMER_INTENCLR_COMPARE3_Pos) |
+                           (TIMER_INTENCLR_COMPARE4_Clear << TIMER_INTENCLR_COMPARE4_Pos);
+
     NRF_TIMER0->SHORTS = TIMER_SHORTS_COMPARE2_CLEAR_Enabled << TIMER_SHORTS_COMPARE2_CLEAR_Pos;
+}
+
+/**
+ * @brief Function for initializing RADIO. Radio will be in charge of sending a determined packet that the receiver will
+ * identify so that both boards remain in sync. 
+ * Radio in this case should be set up as Tx
+ */
+void radio_setup() {
+    
 }
 
 /**
