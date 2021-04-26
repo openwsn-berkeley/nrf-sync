@@ -1,6 +1,6 @@
 {
     "env": {
-        "nrfSDK": "/Users/martinabalbi/nRF5_SDK_17.0.2_d674dde"
+        "nrfSDK": "C:/nRF5_SDK"
     },
     "configurations": [
         {
@@ -34,7 +34,7 @@
                 "${workspaceFolder}/nrf-sync_receiver/pca10056/blank",
                 "${workspaceFolder}/nrf-sync_transmitter/pca10056/blank/config",
                 "${workspaceFolder}/nrf-sync_transmitter/pca10056/blank",
-                "/Applications/arm_segger_embedded_studio_v534a_macos_x64_nordic/include"
+                "C:/Program Files/SEGGER/arm_segger_embedded_studio_v534a_win_x64_nordic/include"
             ],
             "defines": [
                 "_DEBUG",
