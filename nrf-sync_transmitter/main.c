@@ -19,8 +19,11 @@
 //GPIOTE stuff
 #define OUTPUT_PIN_NUMBER 8UL //Output pin number
 #define OUTPUT_PIN_PORT 1UL //Output pin port
+#define BUTTON_PIN_NUMBER 11 //Button 1
+#define BUTTON_PIN_PORT 0UL
 
-#define GPIOTE_CH 0
+#define GPIOTE_CH_PULSE 0
+#define GPIOTE_CH_BUTTON 1
 
 //TIMER stuff
 #define PULSE_DURATION 10 //Time in ms
@@ -38,11 +41,16 @@ static uint8_t packet = MAGIC_NUMBER;
  * to toggle. Pin is set to begin low. 
  */
 void gpiote_setup() {
-    NRF_GPIOTE->CONFIG[GPIOTE_CH] = (GPIOTE_CONFIG_MODE_Task       << GPIOTE_CONFIG_MODE_Pos) |
-                                    (OUTPUT_PIN_NUMBER             << GPIOTE_CONFIG_PSEL_Pos) |
-                                    (OUTPUT_PIN_PORT               << GPIOTE_CONFIG_PORT_Pos) |
-                                    (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
-                                    (GPIOTE_CONFIG_OUTINIT_Low    << GPIOTE_CONFIG_OUTINIT_Pos);
+    NRF_GPIOTE->CONFIG[GPIOTE_CH_PULSE] = (GPIOTE_CONFIG_MODE_Task       << GPIOTE_CONFIG_MODE_Pos) |
+                                          (OUTPUT_PIN_NUMBER             << GPIOTE_CONFIG_PSEL_Pos) |
+                                          (OUTPUT_PIN_PORT               << GPIOTE_CONFIG_PORT_Pos) |
+                                          (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
+                                          (GPIOTE_CONFIG_OUTINIT_Low     << GPIOTE_CONFIG_OUTINIT_Pos);
+
+    NRF_GPIOTE->CONFIG[GPIOTE_CH_BUTTON] = (GPIOTE_CONFIG_MODE_Event      << GPIOTE_CONFIG_MODE_Pos) |
+                                           (BUTTON_PIN_NUMBER             << GPIOTE_CONFIG_PSEL_Pos) |
+                                           (BUTTON_PIN_PORT               << GPIOTE_CONFIG_PORT_Pos) |
+                                           (GPIOTE_CONFIG_POLARITY_HiToLo << GPIOTE_CONFIG_POLARITY_Pos); //Buttons are active low
 }
 
 /**
@@ -125,18 +133,18 @@ void radio_setup() {
 
 /**
  * @brief Function for initializing PPI. 
- * Connections to be made: - Toggle pin high after offset time: EVENTS_COMPARE[0] from TIMER1 with TASKS_OUT[GPIOTE_CH] (will set pin high) -> PPI channel 0
+ * Connections to be made: - Toggle pin high after offset time: EVENTS_COMPARE[0] from TIMER1 with TASKS_OUT[GPIOTE_CH_PULSE] (will set pin high) -> PPI channel 0
  *                         - Start Timer 0 that manages pulse duration: EVENTS_COMPARE[0] from TIMER1 with TASKS_START from TIMER0 -> PPI channel 0 FORK[0].TEP (same event triggers 2 tasks)
- *                         - Toggle pin low after pulse time: EVENTS_COMPARE[1] with TASKS_OUT[GPIOTE_CH] (will set pin low)  -> PPI channel 1
+ *                         - Toggle pin low after pulse time: EVENTS_COMPARE[1] with TASKS_OUT[GPIOTE_CH_PULSE] (will set pin low) -> PPI channel 1
  *                         - Start Timer 1 that manages the offset after Timer 0 ends: EVENTS_COMPARE[2] from TIMER0 with TASKS_START from TIMER1 -> PPI channel 2
  *                         - Send another packet after Timer 0 ends: EVENTS_COMPARE[2] with TASKS_START from RADIO -> PPI channel 2 FORK[2].TEP (at the same time that the offset timer starts)
  *                              *the offset will include the time difference between the Radio starting and when the packet is actually sent
  *                         - EVENTS_HFCLKSTARTED from CLOCK to TASKS_TXEN from RADIO -> PPI channel 3
- *                         - EVENTS_READY from RADIO to TASKS_START from TIMER1 (just to begin the program) -> PPI channel 4
+ *                         - EVENTS_IN[GPIOTE_CH_BUTTON] from GPIOTE to TASKS_START from TIMER1 (just to begin the program) -> PPI channel 4
  */
 void ppi_setup() {
     //get endpoint addresses
-    uint32_t gpiote_task_addr = (uint32_t)&NRF_GPIOTE->TASKS_OUT[GPIOTE_CH];
+    uint32_t gpiote_task_addr = (uint32_t)&NRF_GPIOTE->TASKS_OUT[GPIOTE_CH_PULSE];
     uint32_t timer0_task_start_addr = (uint32_t)&NRF_TIMER0->TASKS_START;
     uint32_t timer1_task_start_addr = (uint32_t)&NRF_TIMER1->TASKS_START;
     uint32_t radio_tasks_txen_addr = (uint32_t)&NRF_RADIO->TASKS_TXEN;
@@ -145,7 +153,7 @@ void ppi_setup() {
     uint32_t timer0_events_compare_1_addr = (uint32_t)&NRF_TIMER0->EVENTS_COMPARE[1];
     uint32_t timer0_events_compare_2_addr = (uint32_t)&NRF_TIMER0->EVENTS_COMPARE[2];
     uint32_t clock_events_hfclkstart_addr = (uint32_t)&NRF_CLOCK->EVENTS_HFCLKSTARTED;
-    uint32_t radio_events_ready_addr = (uint32_t)&NRF_RADIO->EVENTS_READY;
+    uint32_t gpiote_events_addr = (uint32_t)&NRF_GPIOTE->EVENTS_IN[GPIOTE_CH_BUTTON];
 
     //set endpoints
     NRF_PPI->CH[0].EEP = timer1_events_compare_0_addr;
@@ -164,7 +172,7 @@ void ppi_setup() {
     NRF_PPI->CH[3].EEP = clock_events_hfclkstart_addr;
     NRF_PPI->CH[3].TEP = radio_tasks_txen_addr;
 
-    NRF_PPI->CH[4].EEP = radio_events_ready_addr;
+    NRF_PPI->CH[4].EEP = gpiote_events_addr;
     NRF_PPI->CH[4].TEP = timer1_task_start_addr;
 
     //enable channels
@@ -180,7 +188,7 @@ void ppi_setup() {
  * @return 0. int return type required by ANSI/ISO standard.
  */
 int main(void) {
-    //TEST 2: Send the packet via radio and see if the receiver gets it by displaying it via UART
+    //TEST Final: Start transmitting when button pressed.
 
     //setup peripherals
     gpiote_setup();
@@ -190,7 +198,7 @@ int main(void) {
     ppi_setup();
 
     //Start
-    //External HFCLK must be started and the Radio must be enabled as TX (now the radio thing will be done through PPI)
+    //External HFCLK must be started and the Radio must be enabled as TX (the radio thing will be done through PPI)
     NRF_CLOCK->TASKS_HFCLKSTART = CLOCK_TASKS_HFCLKSTART_TASKS_HFCLKSTART_Trigger;
 
     while (true) {

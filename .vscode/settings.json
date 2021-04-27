@@ -4,7 +4,8 @@
         "pca10056.h": "c",
         "nrf_log_default_backends.h": "c",
         "nrf_log_ctrl.h": "c",
-        "sdk_config.h": "c"
+        "sdk_config.h": "c",
+        "nrf52840_bitfields.h": "c"
     },
     "gitdoc.enabled": false
 }

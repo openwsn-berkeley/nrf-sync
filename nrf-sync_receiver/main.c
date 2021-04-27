@@ -16,18 +16,14 @@
 #include "nrf52840.h"
 #include "nrf52840_peripherals.h"
 
-#include "radio_config.h"
-#include "nrf_gpio.h"
-#include "boards.h"
-#include "bsp.h"
-#include "app_timer.h"
-#include "nordic_common.h"
-#include "nrf_error.h"
-#include "app_error.h"
+//GPIOTE stuff
+#define OUTPUT_PIN_NUMBER 14UL //Output pin number
+#define OUTPUT_PIN_PORT 1UL //Output pin port
 
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_log_default_backends.h"
+#define GPIOTE_CH 0
+
+//TIMER stuff
+#define PULSE_DURATION 10 //Time in ms
 
 //Radio stuff
 static uint8_t packet; //Packet will be stored here 
@@ -35,10 +31,14 @@ static uint8_t packet; //Packet will be stored here
 
 /**
  * @brief Function for initializing output pin with GPIOTE. It will be set in Task mode with action on pin configured 
- * to toggle. Event is generated when the pin toggles. Pin is set to begin low. 
+ * to toggle. Pin is set to begin low. 
  */
 void gpiote_setup() {
-
+    NRF_GPIOTE->CONFIG[GPIOTE_CH] = (GPIOTE_CONFIG_MODE_Task       << GPIOTE_CONFIG_MODE_Pos) |
+                                    (OUTPUT_PIN_NUMBER             << GPIOTE_CONFIG_PSEL_Pos) |
+                                    (OUTPUT_PIN_PORT               << GPIOTE_CONFIG_PORT_Pos) |
+                                    (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
+                                    (GPIOTE_CONFIG_OUTINIT_Low    << GPIOTE_CONFIG_OUTINIT_Pos);
 }
 
 /**
@@ -46,7 +46,16 @@ void gpiote_setup() {
  * Default values: PRESCALER = 4, MODE = Timer
  */
 void timer0_setup() {
+    NRF_TIMER0->BITMODE = TIMER_BITMODE_BITMODE_32Bit;
 
+    NRF_TIMER0->CC[0] = PULSE_DURATION * 1000;
+
+    //Event when CC[0] will be connected via PPI to the GPIOTE task and shortcutted to clear timer 
+    //task and to stop timer.
+
+
+    NRF_TIMER0->SHORTS = (TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos) |
+                         (TIMER_SHORTS_COMPARE0_STOP_Enabled  << TIMER_SHORTS_COMPARE0_STOP_Pos);
 }
 
 void radio_setup() {
@@ -79,6 +88,12 @@ void radio_setup() {
                        (RADIO_PCNF1_ENDIAN_Little << RADIO_PCNF1_ENDIAN_Pos) | //I personally prefer little endian, for no particular reason
                        (RADIO_PCNF1_WHITEEN_Disabled << RADIO_PCNF1_WHITEEN_Pos);
 
+    //Shortcuts
+    //- READY and START 
+    //- END and START (Radio must be always listening for the packet)
+    NRF_RADIO->SHORTS = (RADIO_SHORTS_READY_START_Enabled << RADIO_SHORTS_READY_START_Pos) |
+                        (RADIO_SHORTS_END_START_Enabled << RADIO_SHORTS_END_START_Pos);
+
     // CRC Config
     NRF_RADIO->CRCCNF = (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos); // Number of checksum bits
     NRF_RADIO->CRCINIT = 0xFFFFUL;   // Initial value
@@ -90,71 +105,36 @@ void radio_setup() {
 
 /**
  * @brief Function for initializing PPI. 
+ * Connections to be made: - Toggle pin high when Radio packet is received correctly: EVENTS_CRCOK from RADIO to TASKS_OUT[GPIOTE_CH] (will set pin high) -> PPI channel 0
+ *                         - Start Timer 0 that manages pulse duration: EVENTS_CRCOK from RADIO with TASKS_START from TIMER0 -> PPI channel 0 FORK[0].TEP (same event triggers 2 tasks)
+ *                         - Toggle pin low after pulse time: EVENTS_COMPARE[0] with TASKS_OUT[GPIOTE_CH] (will set pin low) -> PPI channel 1
+ *                         - EVENTS_HFCLKSTARTED from CLOCK to TASKS_RXEN from RADIO -> PPI channel 2
  */
 void ppi_setup() {
+    //get endpoint addresses
+    uint32_t gpiote_task_addr = (uint32_t)&NRF_GPIOTE->TASKS_OUT[GPIOTE_CH];
+    uint32_t timer0_task_start_addr = (uint32_t)&NRF_TIMER0->TASKS_START;
+    uint32_t radio_tasks_rxen_addr = (uint32_t)&NRF_RADIO->TASKS_RXEN;
+    uint32_t timer0_events_compare_0_addr = (uint32_t)&NRF_TIMER0->EVENTS_COMPARE[0];
+    uint32_t clock_events_hfclkstart_addr = (uint32_t)&NRF_CLOCK->EVENTS_HFCLKSTARTED;
+    uint32_t radio_events_crcok_addr = (uint32_t)&NRF_RADIO->EVENTS_CRCOK;
 
-}
+    //set endpoints
+    NRF_PPI->CH[0].EEP = radio_events_crcok_addr;
+    NRF_PPI->CH[0].TEP = gpiote_task_addr;
 
-/**@brief Function for initialization oscillators.
- */
-void clock_initialization()
-{
-    /* Start 16 MHz crystal oscillator */
-    NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
-    NRF_CLOCK->TASKS_HFCLKSTART    = 1;
+    NRF_PPI->FORK[0].TEP = timer0_task_start_addr;
 
-    /* Wait for the external oscillator to start up */
-    while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0)
-    {
-        // Do nothing.
-    }
+    NRF_PPI->CH[1].EEP = timer0_events_compare_0_addr;
+    NRF_PPI->CH[1].TEP = gpiote_task_addr;
 
-    /* Start low frequency crystal oscillator for app_timer(used by bsp)*/
-    NRF_CLOCK->LFCLKSRC            = (CLOCK_LFCLKSRC_SRC_Xtal << CLOCK_LFCLKSRC_SRC_Pos);
-    NRF_CLOCK->EVENTS_LFCLKSTARTED = 0;
-    NRF_CLOCK->TASKS_LFCLKSTART    = 1;
+    NRF_PPI->CH[2].EEP = clock_events_hfclkstart_addr;
+    NRF_PPI->CH[2].TEP = radio_tasks_rxen_addr;
 
-    while (NRF_CLOCK->EVENTS_LFCLKSTARTED == 0)
-    {
-        // Do nothing.
-    }
-}
-
-uint8_t read_packet()
-{
-    uint8_t result = 0;
-
-    NRF_RADIO->EVENTS_READY = 0U;
-    // Enable radio and wait for ready
-    NRF_RADIO->TASKS_RXEN = 1U;
-
-    while (NRF_RADIO->EVENTS_READY == 0U)
-    {
-        // wait
-    }
-    NRF_RADIO->EVENTS_END = 0U;
-    // Start listening and wait for address received event
-    NRF_RADIO->TASKS_START = 1U;
-
-    // Wait for end of packet or buttons state changed
-    while (NRF_RADIO->EVENTS_END == 0U)
-    {
-        // wait
-    }
-
-    if (NRF_RADIO->CRCSTATUS == 1U)
-    {
-        result = packet;
-    }
-    NRF_RADIO->EVENTS_DISABLED = 0U;
-    // Disable radio
-    NRF_RADIO->TASKS_DISABLE = 1U;
-
-    while (NRF_RADIO->EVENTS_DISABLED == 0U)
-    {
-        // wait
-    }
-    return result;
+    //enable channels
+    NRF_PPI->CHENSET = (PPI_CHENSET_CH0_Enabled << PPI_CHENSET_CH0_Pos) | 
+                       (PPI_CHENSET_CH1_Enabled << PPI_CHENSET_CH1_Pos) |
+                       (PPI_CHENSET_CH2_Enabled << PPI_CHENSET_CH2_Pos);
 }
 
 /**
@@ -162,39 +142,18 @@ uint8_t read_packet()
  * @return 0. int return type required by ANSI/ISO standard.
  */
 int main(void) {
-    uint32_t err_code = NRF_SUCCESS;
-
-    clock_initialization();
-
-    err_code = app_timer_init();
-    APP_ERROR_CHECK(err_code);
-
-    err_code = NRF_LOG_INIT(NULL);
-    APP_ERROR_CHECK(err_code);
-    NRF_LOG_DEFAULT_BACKENDS_INIT();
-
-    err_code = bsp_init(BSP_INIT_LEDS, NULL);
-    APP_ERROR_CHECK(err_code);
-
-    // Set radio configuration parameters
+    //setup peripherals
+    gpiote_setup();
+    timer0_setup();
     radio_setup();
+    ppi_setup();
 
-    err_code = bsp_indication_set(BSP_INDICATE_USER_STATE_OFF);
-    NRF_LOG_INFO("Radio receiver example started.");
-    NRF_LOG_INFO("Wait for first packet");
-    APP_ERROR_CHECK(err_code);
-    NRF_LOG_FLUSH();
+    //Start
+    //External HFCLK must be started and the Radio must be enabled as TX (now the radio thing will be done through PPI)
+    NRF_CLOCK->TASKS_HFCLKSTART = CLOCK_TASKS_HFCLKSTART_TASKS_HFCLKSTART_Trigger;
 
-    while (true)
-    {
-        uint32_t received = read_packet();
-
-        err_code = bsp_indication_set(BSP_INDICATE_RCV_OK);
-        NRF_LOG_INFO("Packet was received");
-        APP_ERROR_CHECK(err_code);
-
-        NRF_LOG_INFO("The contents of the package is %u", (unsigned int)received);
-        NRF_LOG_FLUSH();
+    while (true) {
+        __WFE();
     }
 }
 
