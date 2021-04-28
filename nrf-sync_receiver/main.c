@@ -17,7 +17,7 @@
 #include "nrf52840_peripherals.h"
 
 //GPIOTE stuff
-#define OUTPUT_PIN_NUMBER 14UL //Output pin number
+#define OUTPUT_PIN_NUMBER 10UL //Output pin number
 #define OUTPUT_PIN_PORT 1UL //Output pin port
 
 #define GPIOTE_CH 0
