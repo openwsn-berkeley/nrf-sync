@@ -38,7 +38,7 @@ void gpiote_setup() {
                                     (OUTPUT_PIN_NUMBER             << GPIOTE_CONFIG_PSEL_Pos) |
                                     (OUTPUT_PIN_PORT               << GPIOTE_CONFIG_PORT_Pos) |
                                     (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
-                                    (GPIOTE_CONFIG_OUTINIT_Low    << GPIOTE_CONFIG_OUTINIT_Pos);
+                                    (GPIOTE_CONFIG_OUTINIT_Low     << GPIOTE_CONFIG_OUTINIT_Pos);
 }
 
 /**
