@@ -14,4 +14,5 @@ _C:\nRF5\_SDK\examples\my\_folder\nrf-sync_ \*
 
 To download the code into both boards, open the corresponding Segger Embedded Studio Project that can be found in:
 _C:\nRF5\_SDK\examples\my\_folder\nrf-sync\nrf-sync\_receiver\pca10056\blank\ses_
+
 _C:\nRF5\_SDK\examples\my\_folder\nrf-sync\nrf-sync\_transmitter\pca10056\blank\ses_
