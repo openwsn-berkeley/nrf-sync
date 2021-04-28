@@ -17,8 +17,8 @@
 #include "nrf52840_peripherals.h"
 
 //GPIOTE stuff
-#define OUTPUT_PIN_NUMBER 13UL //Output pin number
-#define OUTPUT_PIN_PORT 0UL //Output pin port
+#define OUTPUT_PIN_NUMBER 10UL //Output pin number
+#define OUTPUT_PIN_PORT 1UL //Output pin port
 #define BUTTON_PIN_NUMBER 11 //Button 1
 #define BUTTON_PIN_PORT 0UL
 
@@ -28,7 +28,7 @@
 //TIMER stuff
 #define PULSE_DURATION 10 //Time in ms
 #define PULSE_PERIOD 1000 //Time in ms -> 1 pulse per second
-#define TIMER_OFFSET 10 //Time in ms
+#define TIMER_OFFSET 0.082 //Time in ms
 
 //Radio stuff
 #define MAGIC_NUMBER 42
@@ -46,11 +46,6 @@ void gpiote_setup() {
                                           (OUTPUT_PIN_PORT               << GPIOTE_CONFIG_PORT_Pos) |
                                           (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos) |
                                           (GPIOTE_CONFIG_OUTINIT_Low     << GPIOTE_CONFIG_OUTINIT_Pos);
-
-    NRF_GPIOTE->CONFIG[GPIOTE_CH_BUTTON] = (GPIOTE_CONFIG_MODE_Event      << GPIOTE_CONFIG_MODE_Pos) |
-                                           (BUTTON_PIN_NUMBER             << GPIOTE_CONFIG_PSEL_Pos) |
-                                           (BUTTON_PIN_PORT               << GPIOTE_CONFIG_PORT_Pos) |
-                                           (GPIOTE_CONFIG_POLARITY_HiToLo << GPIOTE_CONFIG_POLARITY_Pos); //Buttons are active low
 }
 
 /**
@@ -61,7 +56,7 @@ void timer0_setup() {
     NRF_TIMER0->BITMODE = TIMER_BITMODE_BITMODE_32Bit;
 
     NRF_TIMER0->CC[1] = PULSE_DURATION * 1000;
-    NRF_TIMER0->CC[2] = (PULSE_PERIOD - TIMER_OFFSET) * 1000; //End of Timer (minus Timer offset to avoid counting twice the offset)
+    NRF_TIMER0->CC[2] = (PULSE_PERIOD) * 1000; //End of Timer (minus Timer offset to avoid counting twice the offset)
 
     //Event when CC[1] will be connected via PPI to the GPIOTE task. Event when CC[2] is shortcutted to clear timer 
     //task and to stop timer. Also, event when CC[2] will start Timer 1 and will start Radio so packet is sent through PPI.
@@ -139,8 +134,9 @@ void radio_setup() {
  *                         - Start Timer 1 that manages the offset after Timer 0 ends: EVENTS_COMPARE[2] from TIMER0 with TASKS_START from TIMER1 -> PPI channel 2
  *                         - Send another packet after Timer 0 ends: EVENTS_COMPARE[2] with TASKS_START from RADIO -> PPI channel 2 FORK[2].TEP (at the same time that the offset timer starts)
  *                              *the offset will include the time difference between the Radio starting and when the packet is actually sent
- *                         - EVENTS_HFCLKSTARTED from CLOCK to TASKS_TXEN from RADIO -> PPI channel 3
- *                         - EVENTS_IN[GPIOTE_CH_BUTTON] from GPIOTE to TASKS_START from TIMER1 (just to begin the program) -> PPI channel 4
+ *                         - Begin transmission: EVENTS_HFCLKSTARTED from CLOCK to TASKS_TXEN from RADIO -> PPI channel 3
+ *                         - Begin transmission: EVENTS_READY from RADIO to TASKS_START from TIMER1 (just to begin the program) -> PPI channel 4
+ *                         - Begin transmission: EVENTS_READY from RADIO to TASKS_START from RADIO -> PPI channel 4 FORK[4].TEP
  */
 void ppi_setup() {
     //get endpoint addresses
@@ -153,7 +149,7 @@ void ppi_setup() {
     uint32_t timer0_events_compare_1_addr = (uint32_t)&NRF_TIMER0->EVENTS_COMPARE[1];
     uint32_t timer0_events_compare_2_addr = (uint32_t)&NRF_TIMER0->EVENTS_COMPARE[2];
     uint32_t clock_events_hfclkstart_addr = (uint32_t)&NRF_CLOCK->EVENTS_HFCLKSTARTED;
-    uint32_t gpiote_events_addr = (uint32_t)&NRF_GPIOTE->EVENTS_IN[GPIOTE_CH_BUTTON];
+    uint32_t radio_events_ready_addr = (uint32_t)&NRF_RADIO->EVENTS_READY;
 
     //set endpoints
     NRF_PPI->CH[0].EEP = timer1_events_compare_0_addr;
@@ -172,8 +168,10 @@ void ppi_setup() {
     NRF_PPI->CH[3].EEP = clock_events_hfclkstart_addr;
     NRF_PPI->CH[3].TEP = radio_tasks_txen_addr;
 
-    NRF_PPI->CH[4].EEP = gpiote_events_addr;
+    NRF_PPI->CH[4].EEP = radio_events_ready_addr;
     NRF_PPI->CH[4].TEP = timer1_task_start_addr;
+
+    NRF_PPI->FORK[4].TEP = radio_tasks_start_addr;
 
     //enable channels
     NRF_PPI->CHENSET = (PPI_CHENSET_CH0_Enabled << PPI_CHENSET_CH0_Pos) | 
