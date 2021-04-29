@@ -1,6 +1,6 @@
 # nrf-sync 📡
 
-`nrf-sync` is an application that allows you to toggle high a pin on two different nRF52840 DK boards for a certain amount of time in perfect sync. For this, one of the boards (the transmitter) sends a radio packet and after a configurable amount of time (the offset) toggles the pin high, while the other (the receiver) receives this packet and toggles its pin high as well. The offset is configured so that both pins go high at the exact same time.  
+`nrf-sync` is an application that allows you to toggle high a pin on two different nRF52840 DK boards for a certain amount of time in perfect sync. For this, one of the boards (the transmitter) sends a radio packet and after a configurable amount of time (the offset) toggles the pin high, while the other (the receiver) receives this packet and toggles its pin high as well. The offset is configured so that both pins go high at the exact same time. The cool thing is, all of this is done with 0 CPU involvement by using the PPI peripheral to link tasks and events.   
 
 To use the application you need:
 - 2 nRF5280 DK boards
@@ -18,3 +18,5 @@ To download the code into both boards, open the corresponding Segger Embedded St
 `C:\nRF5\_SDK\examples\my\_folder\nrf-sync\nrf-sync\_receiver\pca10056\blank\ses`
 
 `C:\nRF5\_SDK\examples\my\_folder\nrf-sync\nrf-sync\_transmitter\pca10056\blank\ses`
+
+If you find that the pulses are not exactly in sync, the time offset can be reconfigured. To do this, just open the `main.c` file of the transmitter board and adjust the **TIMER_OFFSET** macro at the beginning of the file. After this, rebuild the project on Segger Embedded and a new hex file will be created. 
