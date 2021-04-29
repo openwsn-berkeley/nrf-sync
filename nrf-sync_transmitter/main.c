@@ -3,9 +3,9 @@
 * @defgroup nrf-sync_transmitter_main main.c
 * @{
 * @ingroup nrf-sync_transmitter
-* @brief Nrf-Sync Transmitter Application main file.
+* @brief nrf-sync Transmitter Application main file.
 *
-* This file contains the source code for the Nrf-Sync application transmitter.
+* This file contains the source code for the nrf-sync application transmitter.
 *
 */
 
@@ -51,7 +51,7 @@ void gpiote_setup() {
 
 /**
  * @brief Function for initializing TIMER0.
- * This Timer will be in charge of managing the pulse duration and frequency.
+ * This Timer will be in charge of managing the pulse duration and period.
  * Default values: PRESCALER = 4, MODE = Timer
  */
 void timer0_setup() {
@@ -59,11 +59,11 @@ void timer0_setup() {
     NRF_TIMER0->BITMODE = TIMER_BITMODE_BITMODE_32Bit;
 
     NRF_TIMER0->CC[1]   = PULSE_DURATION * 1000;
-    NRF_TIMER0->CC[2]   = (PULSE_PERIOD) * 1000; // end of Timer (minus Timer offset to avoid counting twice the offset)
+    NRF_TIMER0->CC[2]   = PULSE_PERIOD   * 1000; // end of Timer (minus Timer offset to avoid counting twice the offset)
 
-    // event when CC[1] will be connected via PPI to the GPIOTE task.
-    // Event when CC[2] is shortcutted to clear timer task and to stop timer.
-    // Also, event when CC[2] will start Timer 1 and will start Radio so packet is sent through PPI.
+    // event when CC[1] will be connected via PPI to the GPIOTE task
+    // event when CC[2] is shortcutted to clear timer task and to stop timer
+    // also, event when CC[2] will start Timer 1 and will start Radio so packet is sent through PPI
 
     NRF_TIMER0->SHORTS  = (TIMER_SHORTS_COMPARE2_CLEAR_Enabled << TIMER_SHORTS_COMPARE2_CLEAR_Pos) |
                           (TIMER_SHORTS_COMPARE2_STOP_Enabled  << TIMER_SHORTS_COMPARE2_STOP_Pos);
@@ -79,55 +79,56 @@ void timer0_setup() {
 
     NRF_TIMER1->CC[0]   = TIMER_OFFSET * 1000; 
 
-     //Once this timer reaches the offset time, it clears, stops and through PPI starts Timer 0 and toggles the GPIOTE.
+     // once this timer reaches the offset time, it clears, stops and through PPI starts Timer 0 and toggles the GPIOTE
 
     NRF_TIMER1->SHORTS  = (TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos) | 
                           (TIMER_SHORTS_COMPARE0_STOP_Enabled  << TIMER_SHORTS_COMPARE0_STOP_Pos);
  }
 
 /**
- * @brief Function for initializing RADIO. Radio will be in charge of sending a determined packet that the receiver will
+ * @brief Function for initializing RADIO. 
+ * Radio will be in charge of sending a determined packet that the receiver will
  * identify so that both boards remain in sync. 
- * Radio in this case should be set up as Tx. TASKS_TXEN must be triggered outside and at the beginning. 
+ * Radio in this case should be set up as Tx.
  */
 void radio_setup() {
 
-    NRF_RADIO->TXPOWER     = (RADIO_TXPOWER_TXPOWER_0dBm << RADIO_TXPOWER_TXPOWER_Pos);
-    NRF_RADIO->FREQUENCY   = 7UL; // frequency bin 7, 2407MHz
-    NRF_RADIO->MODE        = (RADIO_MODE_MODE_Nrf_1Mbit << RADIO_MODE_MODE_Pos);
+    NRF_RADIO->TXPOWER       = (RADIO_TXPOWER_TXPOWER_0dBm << RADIO_TXPOWER_TXPOWER_Pos);
+    NRF_RADIO->FREQUENCY     = 7UL; // frequency bin 7, 2407MHz
+    NRF_RADIO->MODE          = (RADIO_MODE_MODE_Nrf_1Mbit << RADIO_MODE_MODE_Pos);
 
     // address configuration (just random numbers I chose)
-    NRF_RADIO->PREFIX0 = (0xF3UL << RADIO_PREFIX0_AP3_Pos) |    // prefix byte of address 3
-                         (0xF2UL << RADIO_PREFIX0_AP2_Pos) |    // prefix byte of address 2
-                         (0xF1UL << RADIO_PREFIX0_AP1_Pos) |    // prefix byte of address 1
-                         (0xF0UL << RADIO_PREFIX0_AP0_Pos);     // prefix byte of address 0
+    NRF_RADIO->PREFIX0       = (0xF3UL << RADIO_PREFIX0_AP3_Pos) |   // prefix byte of address 3
+                               (0xF2UL << RADIO_PREFIX0_AP2_Pos) |   // prefix byte of address 2
+                               (0xF1UL << RADIO_PREFIX0_AP1_Pos) |   // prefix byte of address 1
+                               (0xF0UL << RADIO_PREFIX0_AP0_Pos);    // prefix byte of address 0
 
-    NRF_RADIO->PREFIX1 = (0xF7UL << RADIO_PREFIX1_AP7_Pos) |    // prefix byte of address 7
-                         (0xF6UL << RADIO_PREFIX1_AP6_Pos) |    // prefix byte of address 6
-                         (0xF5UL << RADIO_PREFIX1_AP5_Pos) |    // prefix byte of address 5
-                         (0xF4UL << RADIO_PREFIX1_AP4_Pos);     // prefix byte of address 4
+    NRF_RADIO->PREFIX1       = (0xF7UL << RADIO_PREFIX1_AP7_Pos) |   // prefix byte of address 7
+                               (0xF6UL << RADIO_PREFIX1_AP6_Pos) |   // prefix byte of address 6
+                               (0xF5UL << RADIO_PREFIX1_AP5_Pos) |   // prefix byte of address 5
+                               (0xF4UL << RADIO_PREFIX1_AP4_Pos);    // prefix byte of address 4
 
-    NRF_RADIO->BASE0    = 0x14071997UL; // Base address for prefix 0
+    NRF_RADIO->BASE0         = 0x14071997UL;     // base address for prefix 0
 
-    NRF_RADIO->BASE1    = 0x16081931UL; // Base address for prefix 1-7
+    NRF_RADIO->BASE1         = 0x16081931UL;     // base address for prefix 1-7
 
-    NRF_RADIO->TXADDRESS = 0UL;  // Set device address 0 to use when transmitting
+    NRF_RADIO->TXADDRESS     = 0UL;              // set device address 0 to use when transmitting
 
-    // Packet configuration
-    NRF_RADIO->PCNF0 = 0UL; //not really interested in these
+    // packet configuration
+    NRF_RADIO->PCNF0    = 0UL; //not really interested in these
 
-    NRF_RADIO->PCNF1 = (1UL << RADIO_PCNF1_MAXLEN_Pos) | //Only sending a 1 byte number
-                       (1UL << RADIO_PCNF1_STATLEN_Pos) | // Since the LENGHT field is not set, this specifies the lenght of the payload
-                       (4UL << RADIO_PCNF1_BALEN_Pos) |
-                       (RADIO_PCNF1_ENDIAN_Little << RADIO_PCNF1_ENDIAN_Pos) | //I personally prefer little endian, for no particular reason
-                       (RADIO_PCNF1_WHITEEN_Disabled << RADIO_PCNF1_WHITEEN_Pos);
+    NRF_RADIO->PCNF1    = (1UL                          << RADIO_PCNF1_MAXLEN_Pos)  |    // only sending a 1 byte number
+                          (1UL                          << RADIO_PCNF1_STATLEN_Pos) |    // since the LENGHT field is not set, this specifies the lenght of the payload
+                          (4UL                          << RADIO_PCNF1_BALEN_Pos)   |
+                          (RADIO_PCNF1_ENDIAN_Little    << RADIO_PCNF1_ENDIAN_Pos)  | 
+                          (RADIO_PCNF1_WHITEEN_Disabled << RADIO_PCNF1_WHITEEN_Pos);
 
     // CRC Config
-    NRF_RADIO->CRCCNF = (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos); // Number of checksum bits
-    NRF_RADIO->CRCINIT = 0xFFFFUL;   // Initial value
-    NRF_RADIO->CRCPOLY = 0x11021UL;  // CRC poly: x^16 + x^12^x^5 + 1
+    NRF_RADIO->CRCCNF   = (RADIO_CRCCNF_LEN_Two << RADIO_CRCCNF_LEN_Pos); // number of checksum bits
+    NRF_RADIO->CRCINIT  = 0xFFFFUL;                                       // initial value
+    NRF_RADIO->CRCPOLY  = 0x11021UL;                                      // CRC poly: x^16 + x^12^x^5 + 1
 
-    //Pointer to packet payload
+    // pointer to packet payload
     NRF_RADIO->PACKETPTR = (uint32_t)&packet;
 }
 
@@ -159,25 +160,25 @@ void ppi_setup() {
     uint32_t radio_events_ready_addr        = (uint32_t)&NRF_RADIO->EVENTS_READY;
 
     // set endpoints
-    NRF_PPI->CH[0].EEP      = timer1_events_compare_0_addr;
-    NRF_PPI->CH[0].TEP      = gpiote_task_addr;
-    NRF_PPI->FORK[0].TEP    = timer0_task_start_addr;
+    NRF_PPI->CH[0].EEP       = timer1_events_compare_0_addr;
+    NRF_PPI->CH[0].TEP       = gpiote_task_addr;
+    NRF_PPI->FORK[0].TEP     = timer0_task_start_addr;
 
-    NRF_PPI->CH[1].EEP      = timer0_events_compare_1_addr;
-    NRF_PPI->CH[1].TEP      = gpiote_task_addr;
+    NRF_PPI->CH[1].EEP       = timer0_events_compare_1_addr;
+    NRF_PPI->CH[1].TEP       = gpiote_task_addr;
 
-    NRF_PPI->CH[2].EEP      = timer0_events_compare_2_addr;
-    NRF_PPI->CH[2].TEP      = timer1_task_start_addr;
-    NRF_PPI->FORK[2].TEP    = radio_tasks_start_addr;
+    NRF_PPI->CH[2].EEP       = timer0_events_compare_2_addr;
+    NRF_PPI->CH[2].TEP       = timer1_task_start_addr;
+    NRF_PPI->FORK[2].TEP     = radio_tasks_start_addr;
 
-    NRF_PPI->CH[3].EEP      = clock_events_hfclkstart_addr;
-    NRF_PPI->CH[3].TEP      = radio_tasks_txen_addr;
+    NRF_PPI->CH[3].EEP       = clock_events_hfclkstart_addr;
+    NRF_PPI->CH[3].TEP       = radio_tasks_txen_addr;
 
-    NRF_PPI->CH[4].EEP      = radio_events_ready_addr;
-    NRF_PPI->CH[4].TEP      = timer1_task_start_addr;
-    NRF_PPI->FORK[4].TEP    = radio_tasks_start_addr;
+    NRF_PPI->CH[4].EEP       = radio_events_ready_addr;
+    NRF_PPI->CH[4].TEP       = timer1_task_start_addr;
+    NRF_PPI->FORK[4].TEP     = radio_tasks_start_addr;
  
-    //enable channels
+    // enable channels
     NRF_PPI->CHENSET = (PPI_CHENSET_CH0_Enabled << PPI_CHENSET_CH0_Pos) | 
                        (PPI_CHENSET_CH1_Enabled << PPI_CHENSET_CH1_Pos) |
                        (PPI_CHENSET_CH2_Enabled << PPI_CHENSET_CH2_Pos) |

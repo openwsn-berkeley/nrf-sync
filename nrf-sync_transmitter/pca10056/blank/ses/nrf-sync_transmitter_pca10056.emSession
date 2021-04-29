@@ -58,5 +58,5 @@
  <Files>
   <SessionOpenFile windowGroup="DockEditLeft" x="24" y="58" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../main.c" selected="1" top="13" codecName="Default"/>
  </Files>
- <ARMCrossStudioWindow activeProject="transmitter_pca10056" fileDialogDefaultFilter="*.asm;*.s;*.inc" autoConnectTarget="J-Link" buildConfiguration="Release" sessionSettings="" debugSearchFileMap="/Applications/SEGGER Embedded Studio for ARM 5.42/source/thumb_crt0.s&#xa;" fileDialogInitialDirectory="" debugSearchPath="" autoConnectCapabilities="3711"/>
+ <ARMCrossStudioWindow activeProject="transmitter_pca10056" fileDialogDefaultFilter="*.asm;*.s;*.inc" autoConnectTarget="J-Link" buildConfiguration="Release" sessionSettings="" debugSearchFileMap="/Applications/SEGGER Embedded Studio for ARM 5.42/source/thumb_crt0.s&#xa;" fileDialogInitialDirectory="" debugSearchPath="" autoConnectCapabilities="3199"/>
 </session>
